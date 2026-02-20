@@ -6,12 +6,12 @@ import { PlusCircle, Award, Clock, Zap } from "lucide-react";
 const mockCourses = [
     {
         id: 1,
-        title: "Elementary English (A1)",
-        description: "Ingliz tilini noldan o'rganishni boshlang.",
-        progress: 78,
-        moduleCount: 14,
-        duration: "12h 40m",
-        image: "https://images.unsplash.com/photo-1543167664-400296413a16?auto=format&fit=crop&q=80&w=800",
+        title: "Ingliz tilini 0 dan o'rganish",
+        description: "Ibrat Farzandlari bilan ingliz tilini noldan boshlang. 9 ta dars mavjud.",
+        progress: 0,
+        moduleCount: 9,
+        duration: "Har xil",
+        image: "https://i.ytimg.com/vi/vXF_nHbjE0w/maxresdefault.jpg",
         teacher: "Ibrat Farzandlari",
         language: "en"
     },
