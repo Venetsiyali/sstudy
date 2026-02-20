@@ -10,7 +10,15 @@ interface Message {
     content: string
 }
 
-export function AITutorSidebar() {
+interface AITutorSidebarProps {
+    context?: {
+        title: string;
+        content: string;
+        transcript?: string | null;
+    } | null;
+}
+
+export function AITutorSidebar({ context }: AITutorSidebarProps) {
     const [messages, setMessages] = useState<Message[]>([
         { role: "bot", content: "Assalomu alaykum! Men sizning SI-Maslahatchingizman. Dars bo'yicha har qanday savolingizni bering." }
     ])
@@ -29,9 +37,17 @@ export function AITutorSidebar() {
             // Mock API call for now
             // In real implementation, this calls POST /api/v1/rag/ask
             setTimeout(() => {
+                let reply = "Darslikdan ushbu ma'lumotni topdim. Bu tushuncha shuni anglatadiki...";
+
+                if (context?.transcript) {
+                    reply = `Video transkriptidan kelib chiqsak: "${context.transcript.substring(0, 100)}..." asosida shuni aytishim mumkinki... (Bu yerda to'liq tahlil bo'ladi)`;
+                } else if (context?.content) {
+                    reply = `Dars materiallariga asoslanib: ${context.content.substring(0, 50)}...`;
+                }
+
                 setMessages(prev => [...prev, {
                     role: "bot",
-                    content: "Darslikdan ushbu ma'lumotni topdim. Bu tushuncha shuni anglatadiki..."
+                    content: reply
                 }])
                 setLoading(false)
             }, 1000)

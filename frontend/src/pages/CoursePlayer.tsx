@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom"
+import { useState, useEffect } from "react"
 import { AITutorSidebar } from "@/components/AITutorSidebar"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
@@ -7,6 +8,21 @@ import { Link } from "react-router-dom"
 
 export function CoursePlayer() {
     const { id } = useParams()
+
+    const [context, setContext] = useState<any>(null);
+
+    // Mock fetching context
+    // In real app: useEffect to fetch from /api/v1/lessons/{id}/context
+    useEffect(() => {
+        // Simulating API response
+        setTimeout(() => {
+            setContext({
+                title: `Lesson ${id}`,
+                content: "Lesson content placeholder...",
+                transcript: "Bu darsda biz React asoslarini o'rganamiz. Komponentlar, holat (state) va xususiyatlar (props) haqida gaplashamiz..."
+            });
+        }, 500);
+    }, [id]);
 
     return (
         <div className="flex h-screen bg-background">
@@ -27,7 +43,7 @@ export function CoursePlayer() {
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-4xl mx-auto space-y-6">
                         {/* Video Player */}
-                        <div className="aspect-video bg-black rounded-lg overflow-hidden relative group">
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden relative group shadow-2xl ring-1 ring-slate-900/5">
                             <ReactPlayer
                                 url="https://www.youtube.com/watch?v=LXb3EKWsInQ" // Default placeholder video
                                 width="100%"
@@ -61,7 +77,7 @@ export function CoursePlayer() {
             </div>
 
             {/* Right Sidebar: AI Tutor */}
-            <AITutorSidebar />
+            <AITutorSidebar context={context} />
         </div>
     )
 }
