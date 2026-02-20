@@ -1,31 +1,38 @@
-import { useParams } from "react-router-dom"
+import { useParams, Link } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 import { AITutorSidebar } from "@/components/AITutorSidebar"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import ReactPlayer from 'react-player'
-import { Link } from "react-router-dom"
+import { ArrowLeft, Zap } from "lucide-react"
+import ReactPlayerLib from 'react-player'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ReactPlayer = ReactPlayerLib as any
 
 export function CoursePlayer() {
     const { id } = useParams()
-
     const [context, setContext] = useState<any>(null);
+    const playerRef = useRef<any>(null)
 
-    // Mock fetching context
-    // In real app: useEffect to fetch from /api/v1/lessons/{id}/context
     useEffect(() => {
-        // Simulating API response
         setTimeout(() => {
             setContext({
-                title: `Lesson ${id}`,
-                content: "Lesson content placeholder...",
-                video_url: "https://www.youtube.com/watch?v=LXb3EKWsInQ", // Mock video URL
-                transcript: "Bu darsda biz React asoslarini o'rganamiz. Komponentlar, holat (state) va xususiyatlar (props) haqida gaplashamiz..."
+                title: `Dars ${id}`,
+                content: "Bu darsda biz React asoslarini o'rganamiz.",
+                video_url: "https://www.youtube.com/watch?v=LXb3EKWsInQ",
+                summary: "Bu darsda biz React asoslarini o'rganamiz. Komponentlar va state haqida gaplashamiz.",
+                vocabulary: [
+                    { word: "State", translation: "Holat", context: "State is an object that holds information." },
+                    { word: "Props", translation: "Xususiyatlar", context: "Props are used to pass data." }
+                ],
+                quiz: [
+                    { question: "State nima?", options: ["Ob'ekt", "Funksiya", "Massiv", "Klass"], answer: "Ob'ekt" }
+                ],
+                chapters: [
+                    { timestamp: 0, title: "Kirish" },
+                    { timestamp: 120, title: "State haqida" }
+                ]
             });
         }, 500);
     }, [id]);
-
-    const playerRef = useRef<any>(null)
 
     const handleSeek = (seconds: number) => {
         playerRef.current?.seekTo(seconds)
@@ -66,11 +73,6 @@ export function CoursePlayer() {
                                         width="100%"
                                         height="100%"
                                         controls
-                                        config={{
-                                            youtube: {
-                                                playerVars: { showinfo: 0, modestbranding: 1 }
-                                            }
-                                        }}
                                     />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center text-slate-500 gap-4">
@@ -109,9 +111,9 @@ export function CoursePlayer() {
                             </div>
                         )}
 
-                        {/* Lesson Summary/Content */}
-                        <div className="prose prose-slate lg:prose-lg max-w-none">
-                            <h2 className="text-2xl font-bold text-slate-900 mb-4">Dars Xulosasi (AI Summary)</h2>
+                        {/* Lesson Summary */}
+                        <div className="space-y-6">
+                            <h2 className="text-2xl font-bold text-slate-900">Dars Xulosasi (AI Summary)</h2>
                             {context?.summary ? (
                                 <p className="text-slate-600 leading-relaxed p-4 bg-indigo-50/50 rounded-lg border border-indigo-100">
                                     {context.summary}
@@ -120,7 +122,58 @@ export function CoursePlayer() {
                                 <p className="text-slate-500 italic">Xulosa yuklanmoqda...</p>
                             )}
 
-                            <h3 className="text-xl font-bold text-slate-900 mt-8 mb-4">Qo'shimcha Materiallar</h3>
+                            {/* Vocabulary Section */}
+                            {context?.vocabulary && context.vocabulary.length > 0 && (
+                                <div className="mt-8">
+                                    <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                        <span className="p-1 rounded-md bg-amber-100 text-amber-600">📜</span>
+                                        Yangi so'zlar ro'yxati
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {context.vocabulary.map((item: any, i: number) => (
+                                            <div key={i} className="p-4 rounded-xl border border-slate-100 bg-white shadow-sm flex flex-col gap-1">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-lg font-bold text-indigo-600">{item.word}</span>
+                                                    <span className="text-sm font-medium text-slate-400">/ {item.translation}</span>
+                                                </div>
+                                                <p className="text-xs text-slate-500 italic">"{item.context}"</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Quiz Section */}
+                            {context?.quiz && context.quiz.length > 0 && (
+                                <div className="mt-12 p-8 rounded-3xl bg-slate-900 text-white shadow-2xl overflow-hidden relative">
+                                    <div className="relative z-10">
+                                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                                            <Zap className="text-amber-400" />
+                                            Dars bo'yicha test savollari
+                                        </h3>
+                                        <div className="space-y-8">
+                                            {context.quiz.map((q: any, i: number) => (
+                                                <div key={i} className="space-y-4">
+                                                    <p className="text-lg font-medium text-slate-200">{i + 1}. {q.question}</p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        {q.options.map((opt: string) => (
+                                                            <button
+                                                                key={opt}
+                                                                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
+                                                            >
+                                                                {opt}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                                </div>
+                            )}
+
+                            <h3 className="text-xl font-bold text-slate-900 mt-12 mb-4">Qo'shimcha Materiallar</h3>
                             <p className="text-slate-600 leading-relaxed">
                                 {context?.content || "Dars mazmuni yuklanmoqda..."}
                             </p>

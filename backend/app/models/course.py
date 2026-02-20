@@ -8,12 +8,31 @@ class AssignmentType(str, enum.Enum):
     CODING = "coding"
     ESSAY = "essay"
 
+class Language(str, enum.Enum):
+    UZ = "uz"
+    EN = "en"
+    RU = "ru"
+    DE = "de"
+    FR = "fr"
+    ES = "es"
+    TR = "tr"
+    AR = "ar"
+
+class CourseCategory(str, enum.Enum):
+    LANGUAGE_LEARNING = "language_learning"
+    IT = "it"
+    DESIGN = "design"
+    BUSINESS = "business"
+    OTHER = "other"
+
 class Course(Base):
     __tablename__ = "courses"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String, index=True)
     description: Mapped[str] = mapped_column(Text)
+    language: Mapped[Language] = mapped_column(SQLAEnum(Language), default=Language.UZ)
+    category: Mapped[CourseCategory] = mapped_column(SQLAEnum(CourseCategory), default=CourseCategory.LANGUAGE_LEARNING)
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     teacher = relationship("User", back_populates="courses_teaching")
@@ -56,6 +75,8 @@ class Lesson(Base):
     # Storing JSON as Text for simplicity in this stack, or use JSONB if using specific PG types
     key_takeaways: Mapped[str] = mapped_column(Text, nullable=True) 
     chapters: Mapped[str] = mapped_column(Text, nullable=True)
+    vocabulary: Mapped[str] = mapped_column(Text, nullable=True) # JSON array of {word, translation, context}
+    quiz_questions: Mapped[str] = mapped_column(Text, nullable=True) # JSON array of questions
     
     difficulty: Mapped[DifficultyLevel] = mapped_column(SQLAEnum(DifficultyLevel), default=DifficultyLevel.INTERMEDIATE)
 

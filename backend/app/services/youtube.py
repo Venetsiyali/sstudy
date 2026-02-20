@@ -13,6 +13,57 @@ def extract_video_id(url: str) -> Optional[str]:
         return match.group(1)
     return None
 
+def generate_summary(transcript: str) -> str:
+    """
+    Simulates AI summarization of a transcript.
+    """
+    words = transcript.split()
+    if len(words) > 100:
+        summary = " ".join(words[:100]) + "..."
+    else:
+        summary = transcript
+    
+    return f"Ushbu darsning batafsil tahlili: {summary} Dars davomida asosiy grammatik qoidalar va kundalik hayotda ishlatiladigan iboralar ko'rib chiqildi."
+
+def generate_vocabulary(transcript: str) -> List[dict]:
+    """
+    Simulates AI extraction of vocabulary from transcript.
+    """
+    return [
+        {"word": "Learning", "translation": "O'rganish", "context": "Learning a new language is fun."},
+        {"word": "Practice", "translation": "Amaliyot", "context": "Practice makes perfect."},
+        {"word": "Progress", "translation": "Rivojlanish", "context": "You are making great progress."}
+    ]
+
+def generate_quiz(transcript: str) -> List[dict]:
+    """
+    Simulates AI quiz generation from transcript.
+    """
+    return [
+        {
+            "question": "Darsda nima haqida gapirildi?",
+            "options": ["Til o'rganish", "Matematika", "Fizika", "Tarix"],
+            "answer": "Til o'rganish"
+        },
+        {
+            "question": "Muntazam amaliyot nima uchun kerak?",
+            "options": ["Yaxshiroq natija uchun", "Vaqt o'tkazish uchun", "Hech nima uchun", "Bilmayman"],
+            "answer": "Yaxshiroq natija uchun"
+        }
+    ]
+
+def generate_smart_chapters(transcript: str) -> List[dict]:
+    """
+    Simulates AI generation of smart chapters from transcript.
+    """
+    # This is a placeholder. In a real application, this would involve more complex logic.
+    return [
+        {"title": "Introduction", "start_time": "0:00"},
+        {"title": "Key Concepts", "start_time": "1:30"},
+        {"title": "Examples", "start_time": "3:45"},
+        {"title": "Conclusion", "start_time": "5:00"}
+    ]
+
 def get_transcript(video_url: str) -> Optional[str]:
     """
     Fetches the transcript of a YouTube video.

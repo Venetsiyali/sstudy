@@ -13,6 +13,8 @@ from app.services.video_processing import extract_audio, generate_video_insights
 from app.services.chunking import chunk_text
 from app.models.rag import DocumentChunk
 from app.services.embeddings import get_embedding
+from app.services.playlist_importer import import_youtube_playlist
+from app.models.course import Language
 
 router = APIRouter()
 
@@ -103,4 +105,77 @@ async def create_lesson_with_video(
     from app.db.session import AsyncSessionLocal
     background_tasks.add_task(process_video_task, db_lesson.id, file_location, AsyncSessionLocal)
 
-    return {"message": "Lesson created. Video processing started in background.", "lesson_id": db_lesson.id}
+@router.post("/import-playlist", response_model=Any)
+async def import_playlist_endpoint(
+    playlist_url: str,
+    title: str,
+    description: str,
+    language: Language,
+    video_urls: List[str], # Explicitly provided for this demo/simulation
+    db: Annotated[AsyncSession, Depends(deps.get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_active_user)],
+):
+    """
+    Admin endpoint to import a YouTube playlist as a course.
+    """
+    # Convert AsyncSession to sync Session for the service (or update service to be async)
+    # For now, we simulate with the provided urls
+    course = await import_youtube_playlist(
+        db=db,
+        playlist_url=playlist_url,
+        title=title,
+        description=description,
+        language=language,
+        teacher_id=current_user.id,
+        video_urls=video_urls
+    )
+    return course
+
+from app.services.youtube import get_transcript, generate_summary, generate_smart_chapters, generate_vocabulary, generate_quiz
+import json
+
+@router.get("/lessons/{lesson_id}/context")
+async def get_lesson_context(
+    lesson_id: int,
+    db: Annotated[AsyncSession, Depends(deps.get_db)],
+    current_user: Annotated[User, Depends(deps.get_current_active_user)],
+) -> Any:
+    """
+    Get context for a lesson, including YouTube transcript, summary, vocabulary and quiz.
+    """
+    result = await db.execute(select(Lesson).where(Lesson.id == lesson_id))
+    lesson = result.scalar_one_or_none()
+    
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    context = {
+        "title": lesson.title,
+        "content": lesson.content,
+        "video_url": lesson.video_url,
+        "transcript": lesson.transcript,
+        "summary": lesson.key_takeaways,
+        "chapters": json.loads(lesson.chapters) if lesson.chapters else [],
+        "vocabulary": json.loads(lesson.vocabulary) if lesson.vocabulary else [],
+        "quiz": json.loads(lesson.quiz_questions) if lesson.quiz_questions else []
+    }
+
+    if lesson.video_source_type == VideoSourceType.YOUTUBE and lesson.video_url and not lesson.transcript:
+        # Fetch and store transcript + AI content in background or real-time for demo
+        transcript = get_transcript(lesson.video_url)
+        if transcript:
+            lesson.transcript = transcript
+            lesson.key_takeaways = generate_summary(transcript)
+            lesson.chapters = json.dumps(generate_smart_chapters(transcript))
+            lesson.vocabulary = json.dumps(generate_vocabulary(transcript))
+            lesson.quiz_questions = json.dumps(generate_quiz(transcript))
+            
+            await db.commit()
+            
+            context["transcript"] = lesson.transcript
+            context["summary"] = lesson.key_takeaways
+            context["chapters"] = json.loads(lesson.chapters)
+            context["vocabulary"] = json.loads(lesson.vocabulary)
+            context["quiz"] = json.loads(lesson.quiz_questions)
+    
+    return context
