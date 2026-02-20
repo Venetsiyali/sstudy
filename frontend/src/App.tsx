@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import Dashboard from "@/pages/Dashboard";
-import CoursePlayer from "@/pages/CoursePlayer";
+import { CoursePlayer } from "@/pages/CoursePlayer";
 import { Toaster } from "@/components/ui/toaster"; // Assuming toaster exists or needs install
 
 function Layout({ children }: { children: React.ReactNode }) {
