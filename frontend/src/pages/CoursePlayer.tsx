@@ -19,12 +19,13 @@ export function CoursePlayer() {
             setContext({
                 title: `Lesson ${id}`,
                 content: "Lesson content placeholder...",
+                video_url: "https://www.youtube.com/watch?v=LXb3EKWsInQ", // Mock video URL
                 transcript: "Bu darsda biz React asoslarini o'rganamiz. Komponentlar, holat (state) va xususiyatlar (props) haqida gaplashamiz..."
             });
         }, 500);
     }, [id]);
 
-    const playerRef = useRef<ReactPlayer>(null)
+    const playerRef = useRef<any>(null)
 
     const handleSeek = (seconds: number) => {
         playerRef.current?.seekTo(seconds)
@@ -57,19 +58,30 @@ export function CoursePlayer() {
 
                         {/* Video Player Section */}
                         <div className="relative group bg-slate-900 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-900/10">
-                            <div className="aspect-video">
-                                <ReactPlayer
-                                    ref={playerRef}
-                                    url="https://www.youtube.com/watch?v=LXb3EKWsInQ" // Default or from context
-                                    width="100%"
-                                    height="100%"
-                                    controls
-                                    config={{
-                                        youtube: {
-                                            playerVars: { showinfo: 0, modestbranding: 1 }
-                                        }
-                                    }}
-                                />
+                            <div className="aspect-video flex items-center justify-center">
+                                {context?.video_url ? (
+                                    <ReactPlayer
+                                        ref={playerRef}
+                                        url={context.video_url}
+                                        width="100%"
+                                        height="100%"
+                                        controls
+                                        config={{
+                                            youtube: {
+                                                playerVars: { showinfo: 0, modestbranding: 1 }
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center text-slate-500 gap-4">
+                                        <div className="h-16 w-16 rounded-full bg-slate-800 flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+                                            </svg>
+                                        </div>
+                                        <p className="font-medium">Video yuklanmagan</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
