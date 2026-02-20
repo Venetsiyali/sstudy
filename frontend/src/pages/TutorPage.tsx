@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, Bot, User, Loader2, Sparkles, BookOpen } from 'lucide-react';
 
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
-const MODEL = 'deepseek/deepseek-chat:free';
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY || '';
+const MODEL = 'llama-3.3-70b-versatile';
 
 interface Message {
     role: "user" | "bot";
@@ -40,13 +40,11 @@ export default function TutorPage() {
                 content: m.content
             }));
 
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                    'Authorization': `Bearer ${GROQ_API_KEY}`,
                     'Content-Type': 'application/json',
-                    'HTTP-Referer': 'https://s-study.uz',
-                    'X-Title': 'S-STUDY SI-Maslahatchi',
                 },
                 body: JSON.stringify({
                     model: MODEL,
@@ -67,7 +65,7 @@ export default function TutorPage() {
         } catch (error: any) {
             setMessages(prev => [...prev, {
                 role: "bot",
-                content: `❌ Xatolik yuz berdi: ${error.message}. Internetni tekshiring.`
+                content: `❌ Xatolik: ${error.message}. Keyinroq qayta urinib ko'ring.`
             }]);
         } finally {
             setLoading(false);
@@ -83,7 +81,7 @@ export default function TutorPage() {
                 </div>
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">SI-Maslahatchi</h1>
-                    <p className="text-sm text-slate-500">Gemini 2.0 Flash · Sun'iy intellekt yordamchisi</p>
+                    <p className="text-sm text-slate-500">Llama 3.3 70B · Groq AI · Bepul</p>
                 </div>
                 <div className="ml-auto flex items-center gap-2 text-xs text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full font-medium">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
@@ -102,7 +100,7 @@ export default function TutorPage() {
                     ].map((q) => (
                         <button
                             key={q}
-                            onClick={() => { setInput(q); }}
+                            onClick={() => setInput(q)}
                             className="text-left p-3 rounded-xl border border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50 text-sm text-slate-600 hover:text-indigo-700 transition-all shadow-sm"
                         >
                             <BookOpen className="w-3.5 h-3.5 inline mr-1.5 text-indigo-400" />
