@@ -3,14 +3,19 @@ import { useState, useEffect, useRef } from "react"
 import { AITutorSidebar } from "@/components/AITutorSidebar"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Zap } from "lucide-react"
-import ReactPlayerLib from 'react-player'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ReactPlayer = ReactPlayerLib as any
+
+// Helper: YouTube URL'dan video ID'sini olish
+function getYouTubeId(url: string): string | null {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
+}
 
 export function CoursePlayer() {
     const { id } = useParams()
     const [context, setContext] = useState<any>(null);
-    const playerRef = useRef<any>(null)
+    // playerRef is kept for future seek functionality if needed
+    const playerRef = useRef<HTMLIFrameElement>(null);
 
     useEffect(() => {
         setTimeout(() => {
@@ -34,15 +39,13 @@ export function CoursePlayer() {
         }, 500);
     }, [id]);
 
-    const handleSeek = (seconds: number) => {
-        playerRef.current?.seekTo(seconds)
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+        const s = (seconds % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
     }
 
-    const formatTime = (seconds: number) => {
-        const date = new Date(0);
-        date.setSeconds(seconds);
-        return date.toISOString().substr(11, 8);
-    }
+    const videoId = getYouTubeId(context?.video_url);
 
     return (
         <div className="flex h-screen bg-background">
@@ -64,24 +67,28 @@ export function CoursePlayer() {
                     <div className="max-w-5xl mx-auto space-y-8">
 
                         {/* Video Player Section */}
-                        <div className="relative group bg-slate-900 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-900/10">
-                            <div className="aspect-video flex items-center justify-center">
-                                {context?.video_url ? (
-                                    <ReactPlayer
+                        <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-900/10">
+                            <div className="aspect-video">
+                                {videoId ? (
+                                    <iframe
                                         ref={playerRef}
-                                        url={context.video_url}
                                         width="100%"
                                         height="100%"
-                                        controls
+                                        src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+                                        title="YouTube video player"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowFullScreen
+                                        className="w-full h-full"
                                     />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center text-slate-500 gap-4">
+                                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-4">
                                         <div className="h-16 w-16 rounded-full bg-slate-800 flex items-center justify-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
                                             </svg>
                                         </div>
-                                        <p className="font-medium">Video yuklanmagan</p>
+                                        <p className="font-medium text-sm">Video yuklanmagan</p>
                                     </div>
                                 )}
                             </div>
@@ -96,16 +103,18 @@ export function CoursePlayer() {
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                                     {context.chapters.map((chapter: any, index: number) => (
-                                        <button
+                                        <a
                                             key={index}
-                                            onClick={() => handleSeek(chapter.timestamp)}
+                                            href={`https://www.youtube.com/watch?v=${videoId}&t=${chapter.timestamp}s`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left"
                                         >
                                             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white border border-slate-200 text-xs font-bold text-indigo-600 shadow-sm">
-                                                {formatTime(chapter.timestamp).substr(3, 5)}
+                                                {formatTime(chapter.timestamp)}
                                             </div>
                                             <span className="text-sm font-medium text-slate-700">{chapter.title}</span>
-                                        </button>
+                                        </a>
                                     ))}
                                 </div>
                             </div>
@@ -159,7 +168,7 @@ export function CoursePlayer() {
                                                         {q.options.map((opt: string) => (
                                                             <button
                                                                 key={opt}
-                                                                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition-all"
+                                                                className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-indigo-600/40 text-left transition-all"
                                                             >
                                                                 {opt}
                                                             </button>
