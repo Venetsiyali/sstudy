@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Send, Bot, User, Loader2, Sparkles, BookOpen } from 'lucide-react';
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || '';
-const MODEL = 'meta-llama/llama-3.1-8b-instruct:free';
+const MODEL = 'deepseek/deepseek-chat:free';
 
 interface Message {
     role: "user" | "bot";
