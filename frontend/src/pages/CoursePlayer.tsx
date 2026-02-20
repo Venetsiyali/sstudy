@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { AITutorSidebar } from "@/components/AITutorSidebar"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import ReactPlayer from 'react-player/youtube'
+import ReactPlayer from 'react-player'
 import { Link } from "react-router-dom"
 
 export function CoursePlayer() {
