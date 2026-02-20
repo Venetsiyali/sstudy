@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom"
 import { AITutorSidebar } from "@/components/AITutorSidebar"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
+import ReactPlayer from 'react-player/youtube'
 import { Link } from "react-router-dom"
 
 export function CoursePlayer() {
@@ -25,15 +26,25 @@ export function CoursePlayer() {
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="max-w-4xl mx-auto space-y-6">
-                        {/* Video Placeholder */}
-                        <div className="aspect-video bg-black rounded-lg flex items-center justify-center text-white/50">
-                            <span className="text-lg">Video Player Placeholder</span>
+                        {/* Video Player */}
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden relative group">
+                            <ReactPlayer
+                                url="https://www.youtube.com/watch?v=LXb3EKWsInQ" // Default placeholder video
+                                width="100%"
+                                height="100%"
+                                controls
+                                config={{
+                                    youtube: {
+                                        playerVars: { showinfo: 1 }
+                                    }
+                                }}
+                            />
                         </div>
 
                         {/* Lesson Summary/Content */}
                         <div className="prose dark:prose-invert max-w-none">
-                            <h2>Lesson Summary</h2>
-                            <p>
+                            <h2 className="text-2xl font-bold text-slate-900 mb-4">Lesson Summary</h2>
+                            <p className="text-slate-600 leading-relaxed">
                                 This lesson covers the fundamental concepts of...
                                 (Here the text content of the lesson would be displayed,
                                 potentially fetched from the RAG chunks or database).

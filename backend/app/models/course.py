@@ -36,6 +36,10 @@ class DifficultyLevel(str, enum.Enum):
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
 
+class VideoSourceType(str, enum.Enum):
+    YOUTUBE = "youtube"
+    LOCAL = "local"
+
 class Lesson(Base):
     __tablename__ = "lessons"
 
@@ -43,6 +47,7 @@ class Lesson(Base):
     module_id: Mapped[int] = mapped_column(ForeignKey("modules.id"))
     title: Mapped[str] = mapped_column(String)
     content: Mapped[str] = mapped_column(Text) # Markdown or HTML
+    video_source_type: Mapped[VideoSourceType] = mapped_column(SQLAEnum(VideoSourceType), default=VideoSourceType.LOCAL)
     video_url: Mapped[str] = mapped_column(String, nullable=True)
     order: Mapped[int] = mapped_column(Integer)
     
