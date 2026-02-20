@@ -10,7 +10,7 @@ export function Header() {
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
                     <Input
                         type="search"
-                        placeholder="Search courses..."
+                        placeholder="Kurslarni qidirish..."
                         className="w-full bg-slate-50 pl-9 border-slate-200 focus:bg-white transition-colors"
                     />
                 </div>
@@ -23,8 +23,8 @@ export function Header() {
                 </Button>
                 <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end hidden sm:flex">
-                        <span className="text-sm font-semibold text-slate-900">Student User</span>
-                        <span className="text-xs text-slate-500">Free Account</span>
+                        <span className="text-sm font-semibold text-slate-900">Talaba</span>
+                        <span className="text-xs text-slate-500">Bepul Hisob</span>
                     </div>
                     <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">
                         SU

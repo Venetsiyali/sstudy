@@ -12,7 +12,7 @@ interface Message {
 
 export function AITutorSidebar() {
     const [messages, setMessages] = useState<Message[]>([
-        { role: "bot", content: "Hello! I'm your AI Tutor. Ask me anything about this lesson." }
+        { role: "bot", content: "Assalomu alaykum! Men sizning SI-Maslahatchingizman. Dars bo'yicha har qanday savolingizni bering." }
     ])
     const [input, setInput] = useState("")
     const [loading, setLoading] = useState(false)
@@ -31,7 +31,7 @@ export function AITutorSidebar() {
             setTimeout(() => {
                 setMessages(prev => [...prev, {
                     role: "bot",
-                    content: "I found some relevant information in the lesson. This concept explains..."
+                    content: "Darslikdan ushbu ma'lumotni topdim. Bu tushuncha shuni anglatadiki..."
                 }])
                 setLoading(false)
             }, 1000)
@@ -46,7 +46,7 @@ export function AITutorSidebar() {
             <CardHeader className="border-b px-4 py-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                     <Bot className="w-5 h-5 text-primary" />
-                    AI Tutor
+                    SI-Maslahatchi
                 </CardTitle>
             </CardHeader>
 
@@ -55,7 +55,7 @@ export function AITutorSidebar() {
                     {messages.length === 0 ? (
                         <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
                             <Bot className="mb-2 h-12 w-12 opacity-20" />
-                            <p>Ask me anything about this course!</p>
+                            <p>Dars bo'yicha savolingiz bormi?</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -81,7 +81,7 @@ export function AITutorSidebar() {
                                 <div className="flex justify-start">
                                     <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm">
                                         <Loader2 className="h-4 w-4 animate-spin" />
-                                        Thinking...
+                                        O'ylanmoqda...
                                     </div>
                                 </div>
                             )}
@@ -101,12 +101,12 @@ export function AITutorSidebar() {
                     <Input
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Ask a question..."
+                        placeholder="Savolingizni yozing..."
                         className="flex-1"
                     />
                     <Button type="submit" size="icon" disabled={loading}>
                         <Send className="w-4 h-4" />
-                        <span className="sr-only">Send</span>
+                        <span className="sr-only">Yuborish</span>
                     </Button>
                 </form>
             </div>

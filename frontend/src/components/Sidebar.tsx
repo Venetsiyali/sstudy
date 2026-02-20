@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/" },
-    { icon: BookOpen, label: "My Courses", href: "/courses" },
-    { icon: Bot, label: "AI Tutor", href: "/tutor" },
-    { icon: Settings, label: "Settings", href: "/settings" },
+    { icon: LayoutDashboard, label: "Boshqaruv Paneli", href: "/" },
+    { icon: BookOpen, label: "Mening Kurslarim", href: "/courses" },
+    { icon: Bot, label: "SI-Maslahatchi", href: "/tutor" },
+    { icon: Settings, label: "Sozlamalar", href: "/settings" },
 ];
 
 export function Sidebar() {
@@ -26,13 +26,13 @@ export function Sidebar() {
                     </div>
                     <div>
                         <span className="block font-bold text-xl text-slate-900 leading-none tracking-tight">S-STUDY</span>
-                        <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">LMS Platform</span>
+                        <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">Ta'lim Platformasi</span>
                     </div>
                 </div>
             </div>
 
             <nav className="flex-1 space-y-1.5 px-4 py-8">
-                <div className="px-4 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-widest">Menu</div>
+                <div className="px-4 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-widest">Menyu</div>
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.href;
                     return (
@@ -76,7 +76,7 @@ export function Sidebar() {
                     </div>
                     <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm">
                         <LogOut className="h-3.5 w-3.5" />
-                        Sign Out
+                        Chiqish
                     </button>
                 </div>
             </div>

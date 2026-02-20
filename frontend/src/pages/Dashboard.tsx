@@ -47,9 +47,9 @@ const mockCourses = [
 ];
 
 const stats = [
-    { label: "Total Learning Time", value: "34h 12m", icon: Clock, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
-    { label: "Certificates Earned", value: "3", icon: Award, color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
-    { label: "Current Streak", value: "12 Days", icon: Zap, color: "text-amber-500", bg: "bg-amber-50 border-amber-100" },
+    { label: "O'qish Vaqti", value: "34 soat", icon: Clock, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
+    { label: "Sertifikatlar", value: "3", icon: Award, color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
+    { label: "Joriy Streak", value: "12 Kun", icon: Zap, color: "text-amber-500", bg: "bg-amber-50 border-amber-100" },
 ];
 
 export default function Dashboard() {
@@ -58,16 +58,16 @@ export default function Dashboard() {
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-                    <p className="text-slate-500 mt-2 text-lg">Good Morning, Student! Ready to learn something new today?</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Boshqaruv Paneli</h1>
+                    <p className="text-slate-500 mt-2 text-lg">Xush kelibsiz, Talaba! Bugun yangi bilim olishga tayyormisiz?</p>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50">
-                        View Reports
+                        Hisobotlar
                     </Button>
                     <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all">
                         <PlusCircle className="h-4 w-4" />
-                        Explore Courses
+                        Kurslarni Ko'rish
                     </Button>
                 </div>
             </div>
@@ -97,10 +97,10 @@ export default function Dashboard() {
             <div className="space-y-6">
                 <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">In Progress</h2>
-                        <p className="text-sm text-slate-500">Pick up where you left off</p>
+                        <h2 className="text-xl font-bold text-slate-900">Davom etish</h2>
+                        <p className="text-sm text-slate-500">O'qishni to'xtagan joydan davom eting</p>
                     </div>
-                    <Button variant="link" className="text-indigo-600 font-semibold">View All Courses</Button>
+                    <Button variant="link" className="text-indigo-600 font-semibold">Barchasini ko'rish</Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">

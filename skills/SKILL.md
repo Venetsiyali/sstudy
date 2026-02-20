@@ -1,39 +1,30 @@
-# Antigravity AI Skills Configuration
+# Antigravity SI (Sun'iy Intellekt) Ko'nikmalari Konfiguratsiyasi
 
-This file defines the specialized skills enabled for the S-STUDY platform.
+Bu fayl S-STUDY platformasi uchun ixtisoslashgan SI ko'nikmalarini belgilaydi.
 
-## 1. Summarizer Skill
-**Description**: Generates concise summaries of lesson content at varied detail levels.
-**Inputs**: `text` (Lesson Content or Transcript), `level` (short, medium, detailed)
-**Prompt Strategy**:
-- **Short**: "Summarize the following content in 3 bullet points."
-- **Medium**: "Provide a 1-paragraph summary and 5 key takeaways."
-- **Detailed**: "Provide a comprehensive summary with sections for background, core concepts, and practical applications."
+## 1. Xulosachi (Summarizer) Ko'nikmasi
+**Tavsif**: Dars mazmunining turli darajadagi qisqacha mazmunini yaratadi.
+**Kirishlar**: `text` (Dars matni yoki transkript), `level` (qisqa, o'rtacha, batafsil)
+**Prompt Strategiyasi**:
+- **Qisqa**: "Quyidagi matnni 3 ta asosiy nuqtada qisqacha xulosa qil."
+- **O'rtacha**: "1 paragrafli xulosa va 5 ta asosiy tushunchani ajratib ko'rsat."
+- **Batafsil**: "Fon, asosiy tushunchalar va amaliy qo'llanilishini o'z ichiga olgan batafsil xulosa yoz."
 
-## 2. Tutor Skill (RAG)
-**Description**: Answers student questions based *strictly* on provided educational materials.
-**Inputs**: `query` (Student Question), `context` (Retrieved Document Chunks)
-**System Prompt**:
-"You are S-STUDY AI Tutor. Answer the student's question using ONLY the provided context. If the answer is not in the context, state that you don't know based on the current lesson. Do not hallucinate or use outside knowledge. be encouraging and pedagogical."
+## 2. Murabbiy (Tutor) Ko'nikmasi (RAG)
+**Tavsif**: Talabalar savollariga *qat'iy* ravishda taqdim etilgan o'quv materiallari asosida javob beradi.
+**Kirishlar**: `query` (Talaba savoli), `context` (Topilgan hujjat parchalari)
+**Tizim Prompti (System Prompt)**:
+"Siz S-STUDY platformasining SI-Maslahatchisisiz. Talabaning savoliga FAQAT taqdim etilgan kontekst asosida o'zbek tilida javob bering. Agar javob kontekstda bo'lmasa, ushbu dars bo'yicha ma'lumotga ega emasligingizni ayting. Tashqi bilimlarni ishlatmang. Javobingiz samimiy, o'qituvchilarga xos va o'zbek tilining akademik uslubida bo'lsin."
 
-## 3. Path Generator Skill
-**Description**: dynamic learning path adjustment based on performance.
-**Inputs**: `current_module_id`, `quiz_score`, `learning_history`
-**Logic**:
-- IF score < 60%: Recommend reviewing current module + extra remedial reading.
-- IF score > 90%: Recommend skipping next intro lesson or offering "Challenge" assignment.
+## 3. Yo'nalish Generatori (Path Generator)
+**Tavsif**: O'zlashtirishga qarab o'quv rejasini dinamik o'zgartirish.
+**Mantiq**:
+- AGAR ball < 60%: Joriy modulni qayta ko'rib chiqish va qo'shimcha sodda materiallar tavsiya qilish.
+- AGAR ball > 90%: Keyingi kirish darsini o'tkazib yuborish yoki "Qiyin" topshiriq taklif qilish.
 
-## 4. Video Analyst Skill
-**Description**: Automated video processing and insight extraction.
-**pipeline**:
-1. **Extract Audio**: Convert MP4 to MP3.
-2. **Transcribe**: Speech-to-Text (Gemini/Whisper).
-3. **Analyze**: Generate JSON output with `transcript`, `key_takeaways`, and `chapters`.
-**Output Format**:
-```json
-{
-  "transcript": "...",
-  "key_takeaways": ["..."],
-  "chapters": [{"timestamp": "00:00", "title": "Intro"}]
-}
-```
+## 4. Video Tahlilchi (Video Analyst)
+**Tavsif**: Videoni avtomatik qayta ishlash va tahlil qilish.
+**Jarayon**:
+1. **Audio Ajratish**: MP4 dan MP3 ga o'tkazish.
+2. **Transkripsiya**: Nutqni matnga aylantirish (Gemini/Whisper).
+3. **Tahlil**: `transcript`, `key_takeaways` (asosiy g'oyalar) va `chapters` (bo'limlar) JSON formatida qaytarish.
