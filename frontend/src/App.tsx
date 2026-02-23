@@ -5,6 +5,8 @@ import Dashboard from "@/pages/Dashboard";
 import { CoursePlayer } from "@/pages/CoursePlayer";
 import { CourseLessons } from "@/pages/CourseLessons";
 import TutorPage from "@/pages/TutorPage";
+import MyCourses from "@/pages/MyCourses";
+import Settings from "@/pages/Settings";
 import { Toaster } from "@/components/ui/toaster";
 
 // Shared layout with Sidebar + Header
@@ -28,8 +30,10 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<WithSidebar><Dashboard /></WithSidebar>} />
+                <Route path="/courses" element={<WithSidebar><MyCourses /></WithSidebar>} />
                 <Route path="/course/:id" element={<WithSidebar><CourseLessons /></WithSidebar>} />
                 <Route path="/tutor" element={<WithSidebar><TutorPage /></WithSidebar>} />
+                <Route path="/settings" element={<WithSidebar><Settings /></WithSidebar>} />
                 {/* Lesson player — immersive fullscreen with AI sidebar built-in */}
                 <Route path="/lesson/:id" element={<CoursePlayer />} />
             </Routes>
