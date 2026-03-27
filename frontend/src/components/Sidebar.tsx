@@ -1,7 +1,8 @@
-import { Home, BookOpen, Bot, Settings, LogOut, LayoutDashboard } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Home, BookOpen, Bot, Settings, LogOut, LayoutDashboard, Shield } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { getCurrentUser, getUserInitials, logout } from "@/data/authStore";
 
 const menuItems = [
     { icon: LayoutDashboard, label: "Boshqaruv Paneli", href: "/" },
@@ -12,6 +13,14 @@ const menuItems = [
 
 export function Sidebar() {
     const location = useLocation();
+    const navigate = useNavigate();
+    const user = getCurrentUser();
+    const initials = getUserInitials(user);
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
 
     return (
         <motion.aside
@@ -67,18 +76,30 @@ export function Sidebar() {
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
-                            SU
+                            {initials}
                         </div>
                         <div className="overflow-hidden">
-                            <p className="text-sm font-bold text-slate-900 truncate">Student User</p>
-                            <p className="text-xs text-slate-500 truncate">student@s-study.uz</p>
+                            <p className="text-sm font-bold text-slate-900 truncate">{user?.name || "Mehmon"}</p>
+                            <p className="text-xs text-slate-500 truncate">{user?.email || "Kirish kerak"}</p>
                         </div>
                     </div>
-                    <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm">
+                    <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm"
+                    >
                         <LogOut className="h-3.5 w-3.5" />
                         Chiqish
                     </button>
                 </div>
+
+                {/* Admin Panel link */}
+                <Link
+                    to="/admin/login"
+                    className="flex items-center justify-center gap-2 mt-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all"
+                >
+                    <Shield className="h-3.5 w-3.5" />
+                    Admin Panel
+                </Link>
             </div>
         </motion.aside>
     );

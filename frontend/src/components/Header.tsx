@@ -1,8 +1,12 @@
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getCurrentUser, getUserInitials } from "@/data/authStore";
 
 export function Header() {
+    const user = getCurrentUser();
+    const initials = getUserInitials(user);
+
     return (
         <header className="sticky top-0 z-30 flex h-16 w-full items-center gap-4 bg-white/80 backdrop-blur-md border-b px-6">
             <div className="flex flex-1 items-center gap-4 md:ml-64">
@@ -23,11 +27,11 @@ export function Header() {
                 </Button>
                 <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end hidden sm:flex">
-                        <span className="text-sm font-semibold text-slate-900">Talaba</span>
+                        <span className="text-sm font-semibold text-slate-900">{user?.name || "Mehmon"}</span>
                         <span className="text-xs text-slate-500">Bepul Hisob</span>
                     </div>
                     <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">
-                        SU
+                        {initials}
                     </div>
                 </div>
             </div>

@@ -7,7 +7,10 @@ import { CourseLessons } from "@/pages/CourseLessons";
 import TutorPage from "@/pages/TutorPage";
 import MyCourses from "@/pages/MyCourses";
 import Settings from "@/pages/Settings";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
 import { Toaster } from "@/components/ui/toaster";
+import { isLoggedIn } from "@/data/authStore";
 
 // Admin imports
 import AdminLogin from "@/pages/admin/AdminLogin";
@@ -18,7 +21,7 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { isAdminLoggedIn } from "@/data/adminStore";
 
-// Shared layout with Sidebar + Header
+// ── Student layout ──
 function WithSidebar({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
@@ -34,7 +37,15 @@ function WithSidebar({ children }: { children: React.ReactNode }) {
     );
 }
 
-// Admin guard — redirects to login if not authenticated
+// ── Auth guard: redirects to /login if user is not logged in ──
+function AuthGuard({ children }: { children: React.ReactNode }) {
+    if (!isLoggedIn()) {
+        return <Navigate to="/login" replace />;
+    }
+    return <WithSidebar>{children}</WithSidebar>;
+}
+
+// ── Admin guard ──
 function AdminGuard({ children }: { children: React.ReactNode }) {
     if (!isAdminLoggedIn()) {
         return <Navigate to="/admin/login" replace />;
@@ -46,15 +57,19 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* ── Student routes ── */}
-                <Route path="/" element={<WithSidebar><Dashboard /></WithSidebar>} />
-                <Route path="/courses" element={<WithSidebar><MyCourses /></WithSidebar>} />
-                <Route path="/course/:id" element={<WithSidebar><CourseLessons /></WithSidebar>} />
-                <Route path="/tutor" element={<WithSidebar><TutorPage /></WithSidebar>} />
-                <Route path="/settings" element={<WithSidebar><Settings /></WithSidebar>} />
+                {/* ── Public ── */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+
+                {/* ── Student (protected) ── */}
+                <Route path="/" element={<AuthGuard><Dashboard /></AuthGuard>} />
+                <Route path="/courses" element={<AuthGuard><MyCourses /></AuthGuard>} />
+                <Route path="/course/:id" element={<AuthGuard><CourseLessons /></AuthGuard>} />
+                <Route path="/tutor" element={<AuthGuard><TutorPage /></AuthGuard>} />
+                <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
                 <Route path="/lesson/:id" element={<CoursePlayer />} />
 
-                {/* ── Admin routes ── */}
+                {/* ── Admin ── */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
                 <Route path="/admin/courses" element={<AdminGuard><AdminCourses /></AdminGuard>} />
