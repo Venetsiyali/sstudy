@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Users, Plus, TrendingUp, Eye, Clock, BarChart3 } from "lucide-react";
+import { BookOpen, Users, Plus, TrendingUp, BarChart3 } from "lucide-react";
 import { getAdminCourses, getAdminUsers } from "@/data/adminStore";
 
 export default function AdminDashboard() {

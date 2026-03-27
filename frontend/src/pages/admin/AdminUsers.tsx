@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { getAdminUsers, toggleUserStatus, type AppUser } from "@/data/adminStore";
-import { Search, UserCheck, UserX, Users, Shield, MoreVertical } from "lucide-react";
+import { getAdminUsers, toggleUserStatus } from "@/data/adminStore";
+import { Search, UserCheck, UserX, Users } from "lucide-react";
 
 export default function AdminUsers() {
     const [users, setUsers] = useState(getAdminUsers());

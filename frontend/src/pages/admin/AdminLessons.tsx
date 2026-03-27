@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Play, X, Link as LinkIcon, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Play, X, Link as LinkIcon } from "lucide-react";
 import { getAdminCourses, addLesson, deleteLesson, extractVideoId, getYoutubeThumbnail, getYoutubeEmbedUrl } from "@/data/adminStore";
 
 export default function AdminLessons() {
