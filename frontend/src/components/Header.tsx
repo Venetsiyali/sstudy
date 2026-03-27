@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Bell, Search } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { getCurrentProfile, type Profile } from "@/lib/supabase";
@@ -24,17 +25,26 @@ export function Header() {
                 </div>
             </div>
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="relative text-slate-500 hover:text-slate-700">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-                </Button>
-                <div className="flex items-center gap-2">
-                    <div className="flex flex-col items-end hidden sm:flex">
-                        <span className="text-sm font-semibold text-slate-900">{profile?.name || "Yuklanmoqda..."}</span>
-                        <span className="text-xs text-slate-500">Bepul Hisob</span>
+                {profile && (
+                    <Button variant="ghost" size="icon" className="relative text-slate-500 hover:text-slate-700">
+                        <Bell className="h-5 w-5" />
+                        <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                    </Button>
+                )}
+                {profile ? (
+                    <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-end hidden sm:flex">
+                            <span className="text-sm font-semibold text-slate-900">{profile.name}</span>
+                            <span className="text-xs text-slate-500">Bepul Hisob</span>
+                        </div>
+                        <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">{initials}</div>
                     </div>
-                    <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">{initials}</div>
-                </div>
+                ) : (
+                    <div className="flex items-center gap-3">
+                        <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-indigo-600">Kirish</Link>
+                        <Link to="/register" className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition-all">Ro'yxatdan o'tish</Link>
+                    </div>
+                )}
             </div>
         </header>
     );

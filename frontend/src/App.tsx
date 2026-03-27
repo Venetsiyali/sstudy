@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Sidebar } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import Dashboard from "@/pages/Dashboard";
@@ -23,8 +23,8 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import { supabase, isAdmin } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 
-// ── Student layout ──
-function WithSidebar({ children }: { children: React.ReactNode }) {
+// ── Public Student layout (Sidebar & Header present) ──
+function StudentLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900">
             <Sidebar />
@@ -37,10 +37,16 @@ function WithSidebar({ children }: { children: React.ReactNode }) {
     );
 }
 
-// ── Auth guard ──
-function AuthGuard({ children, session }: { children: React.ReactNode; session: Session | null }) {
-    if (!session) return <Navigate to="/login" replace />;
-    return <WithSidebar>{children}</WithSidebar>;
+// ── Strict Auth Guard for Protected Pages ──
+function StrictAuthGuard({ children, session }: { children: React.ReactNode; session: Session | null }) {
+    const location = useLocation();
+    if (!session) {
+        // Encode the current path so we can return after login
+        return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+    }
+    // If it's a page that uses the Sidebar (like Settings/Tutor), wrap it in StudentLayout
+    // But CoursePlayer doesn't use Sidebar, so we handle that in the route definitions.
+    return <>{children}</>;
 }
 
 // ── Admin guard ──
@@ -89,17 +95,19 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* ── Public ── */}
+                {/* ── Auth Pages ── */}
                 <Route path="/login" element={session ? <Navigate to="/" replace /> : <LoginPage />} />
                 <Route path="/register" element={session ? <Navigate to="/" replace /> : <RegisterPage />} />
 
-                {/* ── Student (protected) ── */}
-                <Route path="/" element={<AuthGuard session={session}><Dashboard /></AuthGuard>} />
-                <Route path="/courses" element={<AuthGuard session={session}><MyCourses /></AuthGuard>} />
-                <Route path="/course/:id" element={<AuthGuard session={session}><CourseLessons /></AuthGuard>} />
-                <Route path="/tutor" element={<AuthGuard session={session}><TutorPage /></AuthGuard>} />
-                <Route path="/settings" element={<AuthGuard session={session}><Settings /></AuthGuard>} />
-                <Route path="/lesson/:id" element={<CoursePlayer />} />
+                {/* ── Public Student Pages (Accessible to everyone) ── */}
+                <Route path="/" element={<StudentLayout><Dashboard /></StudentLayout>} />
+                <Route path="/courses" element={<StudentLayout><MyCourses /></StudentLayout>} />
+                <Route path="/course/:id" element={<StudentLayout><CourseLessons /></StudentLayout>} />
+
+                {/* ── Protected Student Pages (Require Login) ── */}
+                <Route path="/tutor" element={<StrictAuthGuard session={session}><StudentLayout><TutorPage /></StudentLayout></StrictAuthGuard>} />
+                <Route path="/settings" element={<StrictAuthGuard session={session}><StudentLayout><Settings /></StudentLayout></StrictAuthGuard>} />
+                <Route path="/lesson/:id" element={<StrictAuthGuard session={session}><CoursePlayer /></StrictAuthGuard>} />
 
                 {/* ── Admin ── */}
                 <Route path="/admin/login" element={<AdminLogin />} />

@@ -65,19 +65,29 @@ export function Sidebar() {
             </nav>
 
             <div className="p-6 mt-auto border-t border-slate-100">
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                    <div className="flex items-center gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">{initials}</div>
-                        <div className="overflow-hidden">
-                            <p className="text-sm font-bold text-slate-900 truncate">{profile?.name || "Yuklanmoqda..."}</p>
-                            <p className="text-xs text-slate-500 truncate">{profile?.email || ""}</p>
+                {profile ? (
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">{initials}</div>
+                            <div className="overflow-hidden">
+                                <p className="text-sm font-bold text-slate-900 truncate">{profile.name}</p>
+                                <p className="text-xs text-slate-500 truncate">{profile.email}</p>
+                            </div>
                         </div>
+                        <button onClick={handleLogout}
+                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm">
+                            <LogOut className="h-3.5 w-3.5" /> Chiqish
+                        </button>
                     </div>
-                    <button onClick={handleLogout}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm">
-                        <LogOut className="h-3.5 w-3.5" /> Chiqish
-                    </button>
-                </div>
+                ) : (
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 text-center">
+                        <p className="text-xs text-slate-500 mb-3">Tizimga kirmagansiz</p>
+                        <Link to="/login" className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-colors">
+                            Kirish / Ro'yxatdan o'tish
+                        </Link>
+                    </div>
+                )}
+                
                 <Link to="/admin/login" className="flex items-center justify-center gap-2 mt-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all">
                     <Shield className="h-3.5 w-3.5" /> Admin Panel
                 </Link>
