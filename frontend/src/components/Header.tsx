@@ -3,13 +3,17 @@ import { Bell, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getCurrentProfile, type Profile } from "@/lib/supabase";
+import { supabase, getCurrentProfile, type Profile } from "@/lib/supabase";
 
 export function Header() {
     const [profile, setProfile] = useState<Profile | null>(null);
 
     useEffect(() => {
         getCurrentProfile().then(setProfile);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+            getCurrentProfile().then(setProfile);
+        });
+        return () => subscription.unsubscribe();
     }, []);
 
     const initials = profile?.name

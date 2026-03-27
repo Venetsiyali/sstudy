@@ -19,6 +19,10 @@ export function Sidebar() {
 
     useEffect(() => {
         getCurrentProfile().then(setProfile);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+            getCurrentProfile().then(setProfile);
+        });
+        return () => subscription.unsubscribe();
     }, []);
 
     const initials = profile?.name

@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { signIn } from "@/lib/supabase";
 import { GraduationCap, Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const redirectTo = searchParams.get("redirect") || "/";
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPass, setShowPass] = useState(false);
@@ -18,7 +21,7 @@ export default function LoginPage() {
 
         const result = await signIn(email, password);
         if (result.ok) {
-            navigate("/");
+            navigate(redirectTo);
         } else {
             setError(result.error || "Xatolik yuz berdi");
         }
