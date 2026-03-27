@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { CourseCard } from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Award, Clock, Zap } from "lucide-react";
-import { getAdminCourses } from "@/data/adminStore";
-import { getCourseProgress, getTotalStudyTime, getTotalCompletedLessons } from "@/data/authStore";
+import { PlusCircle, Award, Clock, Zap, Loader2 } from "lucide-react";
+import { getAllCoursesWithLessons, type Course, type Lesson } from "@/lib/supabase";
 
 const LANG_MAP: Record<string, { name: string; flag: string }> = {
     en: { name: "Ingliz tili", flag: "🇬🇧" },
@@ -13,20 +13,29 @@ const LANG_MAP: Record<string, { name: string; flag: string }> = {
     uz: { name: "O'zbek tili", flag: "🇺🇿" },
 };
 
+type CourseWithLessons = Course & { lessons: Lesson[] };
+
 export default function Dashboard() {
-    const courses = getAdminCourses();
+    const [courses, setCourses] = useState<CourseWithLessons[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedLang, setSelectedLang] = useState('');
+
+    useEffect(() => {
+        loadCourses();
+    }, []);
+
+    const loadCourses = async () => {
+        setLoading(true);
+        const data = await getAllCoursesWithLessons();
+        setCourses(data);
+        if (data.length > 0 && !selectedLang) {
+            setSelectedLang(data[0].language);
+        }
+        setLoading(false);
+    };
+
     const allLanguages = [...new Set(courses.map(c => c.language))];
-    const [selectedLang, setSelectedLang] = useState(allLanguages[0] || 'en');
-
     const filteredCourses = courses.filter(c => c.language === selectedLang);
-    const studyTime = getTotalStudyTime();
-    const completedLessons = getTotalCompletedLessons();
-
-    const stats = [
-        { label: "O'qish Vaqti", value: studyTime, icon: Clock, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
-        { label: "Tugatilgan Darslar", value: String(completedLessons), icon: Award, color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
-        { label: "Jami Kurslar", value: String(courses.length), icon: Zap, color: "text-amber-500", bg: "bg-amber-50 border-amber-100" },
-    ];
 
     const languages = allLanguages.map(id => ({
         id,
@@ -34,67 +43,58 @@ export default function Dashboard() {
         flag: LANG_MAP[id]?.flag || "🌐",
     }));
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-32">
+                <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-10">
-            {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Language Hub 🌍</h1>
                     <p className="text-slate-500 mt-2 text-lg">Tillarni oson o'rganing!</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50">
-                        O'zlashtirish koeffitsienti
-                    </Button>
-                    <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all">
-                        <PlusCircle className="h-4 w-4" />
-                        Yangisini boshlash
-                    </Button>
+                    <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50">O'zlashtirish</Button>
+                    <Link to="/courses">
+                        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 shadow-lg shadow-indigo-200">
+                            <PlusCircle className="h-4 w-4" /> Kurslarim
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
-            {/* Language Selector Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                {languages.map((lang) => (
-                    <button
-                        key={lang.id}
-                        onClick={() => setSelectedLang(lang.id)}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${selectedLang === lang.id
-                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'
-                            }`}
-                    >
-                        <span>{lang.flag}</span>
-                        <span>{lang.name}</span>
-                    </button>
-                ))}
-            </div>
+            {languages.length > 0 && (
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {languages.map(lang => (
+                        <button key={lang.id} onClick={() => setSelectedLang(lang.id)}
+                            className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${selectedLang === lang.id
+                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300'}`}>
+                            <span>{lang.flag}</span><span>{lang.name}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
 
-            {/* Main Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredCourses.length > 0 ? (
-                    filteredCourses.map((course) => (
-                        <CourseCard
-                            key={course.id}
-                            id={course.id}
-                            title={course.title}
-                            description={course.description}
-                            progress={getCourseProgress(course.id, course.lessons.length)}
-                            moduleCount={course.lessons.length}
-                            duration={`${course.lessons.length} dars`}
-                            image={course.thumbnail}
-                            teacher={course.teacher}
-                            language={course.language}
-                        />
+                    filteredCourses.map(course => (
+                        <CourseCard key={course.id} id={course.id} title={course.title} description={course.description}
+                            progress={0} moduleCount={course.lessons.length} duration={`${course.lessons.length} dars`}
+                            image={course.thumbnail} teacher={course.teacher} language={course.language} />
                     ))
                 ) : (
                     <div className="col-span-full py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                        <p className="text-slate-400">Bu til bo'yicha kurslar hozircha yo'q. Admin paneldan qo'shing!</p>
+                        <p className="text-slate-400">{courses.length === 0 ? "Hozircha kurslar yo'q. Admin paneldan qo'shing!" : "Bu til bo'yicha kurslar yo'q"}</p>
                     </div>
                 )}
             </div>
 
-            {/* Global Stats Section */}
             <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="text-center md:text-left">
@@ -102,16 +102,13 @@ export default function Dashboard() {
                         <p className="text-slate-400">Har kuni 15 daqiqa dars qiling va natijani ko'ring!</p>
                     </div>
                     <div className="grid grid-cols-3 gap-8">
-                        {stats.map((stat) => (
-                            <div key={stat.label} className="text-center">
-                                <p className="text-slate-400 text-xs uppercase tracking-widest mb-2">{stat.label}</p>
-                                <p className="text-2xl font-bold">{stat.value}</p>
-                            </div>
-                        ))}
+                        <div className="text-center"><p className="text-slate-400 text-xs uppercase tracking-widest mb-2">Kurslar</p><p className="text-2xl font-bold">{courses.length}</p></div>
+                        <div className="text-center"><p className="text-slate-400 text-xs uppercase tracking-widest mb-2">Darslar</p><p className="text-2xl font-bold">{courses.reduce((s, c) => s + c.lessons.length, 0)}</p></div>
+                        <div className="text-center"><p className="text-slate-400 text-xs uppercase tracking-widest mb-2">Tillar</p><p className="text-2xl font-bold">{allLanguages.length}</p></div>
                     </div>
                 </div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -ml-32 -mb-32" />
             </div>
         </div>
     );

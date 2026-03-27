@@ -1,8 +1,9 @@
+import { useState, useEffect } from "react";
 import { Home, BookOpen, Bot, Settings, LogOut, LayoutDashboard, Shield } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { getCurrentUser, getUserInitials, logout } from "@/data/authStore";
+import { supabase, getCurrentProfile, signOut, type Profile } from "@/lib/supabase";
 
 const menuItems = [
     { icon: LayoutDashboard, label: "Boshqaruv Paneli", href: "/" },
@@ -14,11 +15,18 @@ const menuItems = [
 export function Sidebar() {
     const location = useLocation();
     const navigate = useNavigate();
-    const user = getCurrentUser();
-    const initials = getUserInitials(user);
+    const [profile, setProfile] = useState<Profile | null>(null);
 
-    const handleLogout = () => {
-        logout();
+    useEffect(() => {
+        getCurrentProfile().then(setProfile);
+    }, []);
+
+    const initials = profile?.name
+        ? profile.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
+        : '?';
+
+    const handleLogout = async () => {
+        await signOut();
         navigate("/login");
     };
 
@@ -45,28 +53,12 @@ export function Sidebar() {
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.href;
                     return (
-                        <Link
-                            key={item.href}
-                            to={item.href}
-                            className={cn(
-                                "group relative flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 outline-none",
-                                isActive
-                                    ? "bg-indigo-50/80 text-indigo-700 shadow-sm"
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                            )}
-                        >
+                        <Link key={item.href} to={item.href}
+                            className={cn("group relative flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 outline-none",
+                                isActive ? "bg-indigo-50/80 text-indigo-700 shadow-sm" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900")}>
                             <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600")} />
                             {item.label}
-
-                            {isActive && (
-                                <motion.div
-                                    layoutId="active-nav-indicator"
-                                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-600 rounded-r-full"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                />
-                            )}
+                            {isActive && <motion.div layoutId="active-nav-indicator" className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-600 rounded-r-full" />}
                         </Link>
                     );
                 })}
@@ -75,30 +67,19 @@ export function Sidebar() {
             <div className="p-6 mt-auto border-t border-slate-100">
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                     <div className="flex items-center gap-3 mb-3">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
-                            {initials}
-                        </div>
+                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">{initials}</div>
                         <div className="overflow-hidden">
-                            <p className="text-sm font-bold text-slate-900 truncate">{user?.name || "Mehmon"}</p>
-                            <p className="text-xs text-slate-500 truncate">{user?.email || "Kirish kerak"}</p>
+                            <p className="text-sm font-bold text-slate-900 truncate">{profile?.name || "Yuklanmoqda..."}</p>
+                            <p className="text-xs text-slate-500 truncate">{profile?.email || ""}</p>
                         </div>
                     </div>
-                    <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm"
-                    >
-                        <LogOut className="h-3.5 w-3.5" />
-                        Chiqish
+                    <button onClick={handleLogout}
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 py-2 text-xs font-medium text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors shadow-sm">
+                        <LogOut className="h-3.5 w-3.5" /> Chiqish
                     </button>
                 </div>
-
-                {/* Admin Panel link */}
-                <Link
-                    to="/admin/login"
-                    className="flex items-center justify-center gap-2 mt-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all"
-                >
-                    <Shield className="h-3.5 w-3.5" />
-                    Admin Panel
+                <Link to="/admin/login" className="flex items-center justify-center gap-2 mt-3 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-transparent hover:border-indigo-100 transition-all">
+                    <Shield className="h-3.5 w-3.5" /> Admin Panel
                 </Link>
             </div>
         </motion.aside>

@@ -1,25 +1,28 @@
+import { useState, useEffect } from "react";
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser, getUserInitials } from "@/data/authStore";
+import { getCurrentProfile, type Profile } from "@/lib/supabase";
 
 export function Header() {
-    const user = getCurrentUser();
-    const initials = getUserInitials(user);
+    const [profile, setProfile] = useState<Profile | null>(null);
+
+    useEffect(() => {
+        getCurrentProfile().then(setProfile);
+    }, []);
+
+    const initials = profile?.name
+        ? profile.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()
+        : '?';
 
     return (
         <header className="sticky top-0 z-30 flex h-16 w-full items-center gap-4 bg-white/80 backdrop-blur-md border-b px-6">
             <div className="flex flex-1 items-center gap-4 md:ml-64">
                 <div className="relative w-full max-w-md hidden md:block">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-                    <Input
-                        type="search"
-                        placeholder="Kurslarni qidirish..."
-                        className="w-full bg-slate-50 pl-9 border-slate-200 focus:bg-white transition-colors"
-                    />
+                    <Input type="search" placeholder="Kurslarni qidirish..." className="w-full bg-slate-50 pl-9 border-slate-200 focus:bg-white transition-colors" />
                 </div>
             </div>
-
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" className="relative text-slate-500 hover:text-slate-700">
                     <Bell className="h-5 w-5" />
@@ -27,12 +30,10 @@ export function Header() {
                 </Button>
                 <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end hidden sm:flex">
-                        <span className="text-sm font-semibold text-slate-900">{user?.name || "Mehmon"}</span>
+                        <span className="text-sm font-semibold text-slate-900">{profile?.name || "Yuklanmoqda..."}</span>
                         <span className="text-xs text-slate-500">Bepul Hisob</span>
                     </div>
-                    <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">
-                        {initials}
-                    </div>
+                    <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold border border-indigo-200">{initials}</div>
                 </div>
             </div>
         </header>
