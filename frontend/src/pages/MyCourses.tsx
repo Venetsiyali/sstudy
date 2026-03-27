@@ -1,63 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BookOpen, Clock, Trophy, Play, Search, Filter, ChevronRight, Star, Zap, BarChart3, CheckCircle2, Lock } from "lucide-react";
-import { ALL_COURSES } from "@/data/courses";
+import { BookOpen, Clock, Trophy, Play, Search, ChevronRight, Star, Zap, CheckCircle2 } from "lucide-react";
+import { getAdminCourses } from "@/data/adminStore";
+import { getCourseProgress, getCompletedLessonsCount, getTotalStudyTime } from "@/data/authStore";
 
-// Merge data/courses with extra mock metadata for richer UI
-const enrolledCourses = [
-    {
-        id: 1,
-        title: "Ingliz tilini 0 dan o'rganish",
-        teacher: "Ibrat Farzandlari",
-        thumbnail: "https://i.ytimg.com/vi/vXF_nHbjE0w/maxresdefault.jpg",
-        progress: 11, // 1/9 lessons done
-        totalLessons: 9,
-        completedLessons: 1,
-        language: "🇬🇧 Ingliz tili",
-        level: "Boshlang'ich · A1",
-        rating: 4.9,
-        lastStudied: "Bugun",
-        badge: "🔥 Yangi",
-        color: "from-indigo-500 to-blue-600",
-    },
-    {
-        id: 2,
-        title: "Intermediate English (B1)",
-        teacher: "Ibrat Farzandlari",
-        thumbnail: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
-        progress: 5,
-        totalLessons: 18,
-        completedLessons: 1,
-        language: "🇬🇧 Ingliz tili",
-        level: "O'rta · B1",
-        rating: 4.8,
-        lastStudied: "3 kun oldin",
-        badge: null,
-        color: "from-violet-500 to-purple-600",
-    },
-    {
-        id: 3,
-        title: "Russian Grammar Basics",
-        teacher: "Ibrat Farzandlari",
-        thumbnail: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
-        progress: 42,
-        totalLessons: 20,
-        completedLessons: 8,
-        language: "🇷🇺 Rus tili",
-        level: "Boshlang'ich · A2",
-        rating: 4.7,
-        lastStudied: "Kecha",
-        badge: "⚡ Faol",
-        color: "from-rose-500 to-pink-600",
-    },
-];
-
-const stats = [
-    { label: "Jami Kurslar", value: "3", icon: BookOpen, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100" },
-    { label: "O'qilgan vaqt", value: "34h", icon: Clock, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-    { label: "Joriy Streak", value: "12 🔥", icon: Zap, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
-    { label: "Sertifikatlar", value: "3", icon: Trophy, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-100" },
-];
+const LANG_MAP: Record<string, string> = {
+    en: "🇬🇧 Ingliz tili",
+    ru: "🇷🇺 Rus tili",
+    de: "🇩🇪 Nemis tili",
+    fr: "🇫🇷 Fransuz tili",
+    uz: "🇺🇿 O'zbek tili",
+};
 
 const ProgressRing = ({ progress }: { progress: number }) => {
     const r = 20;
@@ -74,15 +27,33 @@ const ProgressRing = ({ progress }: { progress: number }) => {
 };
 
 export default function MyCourses() {
+    const courses = getAdminCourses();
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"all" | "active" | "done">("all");
 
-    const filtered = enrolledCourses.filter(c => {
+    const coursesWithProgress = courses.map(c => ({
+        ...c,
+        progress: getCourseProgress(c.id, c.lessons.length),
+        completedLessons: getCompletedLessonsCount(c.id),
+        totalLessons: c.lessons.length,
+        languageLabel: LANG_MAP[c.language] || `🌐 ${c.language}`,
+    }));
+
+    const filtered = coursesWithProgress.filter(c => {
         const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
         if (filter === "active") return matchSearch && c.progress > 0 && c.progress < 100;
         if (filter === "done") return matchSearch && c.progress === 100;
         return matchSearch;
     });
+
+    const studyTime = getTotalStudyTime();
+
+    const stats = [
+        { label: "Jami Kurslar", value: String(courses.length), icon: BookOpen, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100" },
+        { label: "O'qilgan vaqt", value: studyTime, icon: Clock, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+        { label: "Joriy Streak", value: "1 🔥", icon: Zap, color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100" },
+        { label: "Sertifikatlar", value: "0", icon: Trophy, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-100" },
+    ];
 
     return (
         <div className="min-h-screen">
@@ -112,24 +83,24 @@ export default function MyCourses() {
                 ))}
             </div>
 
-            {/* Continue Learning — last active course card */}
-            {enrolledCourses[0] && (
+            {/* Continue Learning */}
+            {coursesWithProgress[0] && (
                 <div className="mb-8 p-6 rounded-3xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-700 text-white relative overflow-hidden shadow-xl shadow-indigo-200">
                     <div className="absolute inset-0 opacity-10"
                         style={{ backgroundImage: "radial-gradient(circle at 70% 50%, white 0%, transparent 60%)" }} />
                     <div className="flex items-center gap-5">
-                        <img src={enrolledCourses[0].thumbnail} alt="" className="w-20 h-14 object-cover rounded-xl shadow-lg flex-shrink-0" />
+                        <img src={coursesWithProgress[0].thumbnail} alt="" className="w-20 h-14 object-cover rounded-xl shadow-lg flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                             <p className="text-indigo-200 text-xs font-medium mb-1">📚 O'qishni davom ettiring</p>
-                            <h3 className="font-bold text-lg leading-tight truncate">{enrolledCourses[0].title}</h3>
+                            <h3 className="font-bold text-lg leading-tight truncate">{coursesWithProgress[0].title}</h3>
                             <div className="flex items-center gap-2 mt-2">
                                 <div className="flex-1 h-1.5 bg-white/20 rounded-full">
-                                    <div className="h-1.5 bg-white rounded-full" style={{ width: `${enrolledCourses[0].progress}%` }} />
+                                    <div className="h-1.5 bg-white rounded-full" style={{ width: `${coursesWithProgress[0].progress}%` }} />
                                 </div>
-                                <span className="text-xs text-indigo-200">{enrolledCourses[0].progress}%</span>
+                                <span className="text-xs text-indigo-200">{coursesWithProgress[0].progress}%</span>
                             </div>
                         </div>
-                        <Link to={`/course/${enrolledCourses[0].id}`}>
+                        <Link to={`/course/${coursesWithProgress[0].id}`}>
                             <button className="flex items-center gap-2 bg-white text-indigo-700 font-bold px-5 py-2.5 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm shrink-0">
                                 <Play className="w-4 h-4 fill-current" /> Davom et
                             </button>
@@ -175,12 +146,7 @@ export default function MyCourses() {
                         {/* Thumbnail */}
                         <div className="relative">
                             <img src={course.thumbnail} alt={course.title} className="w-full h-40 object-cover" />
-                            <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent`} />
-                            {course.badge && (
-                                <span className="absolute top-3 left-3 text-xs font-bold bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-slate-700">
-                                    {course.badge}
-                                </span>
-                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             {/* Play button overlay */}
                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <div className="w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg">
@@ -201,9 +167,7 @@ export default function MyCourses() {
                         {/* Content */}
                         <div className="p-4">
                             <div className="flex items-center gap-1.5 mb-2">
-                                <span className="text-xs text-slate-500">{course.language}</span>
-                                <span className="text-slate-300">·</span>
-                                <span className="text-xs text-slate-500">{course.level}</span>
+                                <span className="text-xs text-slate-500">{course.languageLabel}</span>
                             </div>
                             <h3 className="font-bold text-slate-900 leading-snug mb-3 group-hover:text-indigo-700 transition-colors">
                                 {course.title}
@@ -216,11 +180,7 @@ export default function MyCourses() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Star className="w-3.5 h-3.5 text-amber-400 fill-current" />
-                                    {course.rating}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    {course.lastStudied}
+                                    {course.teacher}
                                 </div>
                             </div>
                         </div>

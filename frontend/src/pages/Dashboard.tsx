@@ -2,71 +2,37 @@ import { useState } from "react";
 import { CourseCard } from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Award, Clock, Zap } from "lucide-react";
+import { getAdminCourses } from "@/data/adminStore";
+import { getCourseProgress, getTotalStudyTime, getTotalCompletedLessons } from "@/data/authStore";
 
-const mockCourses = [
-    {
-        id: 1,
-        title: "Ingliz tilini 0 dan o'rganish",
-        description: "Ibrat Farzandlari bilan ingliz tilini noldan boshlang. 9 ta dars mavjud.",
-        progress: 0,
-        moduleCount: 9,
-        duration: "Har xil",
-        image: "https://i.ytimg.com/vi/vXF_nHbjE0w/maxresdefault.jpg",
-        teacher: "Ibrat Farzandlari",
-        language: "en"
-    },
-    {
-        id: 2,
-        title: "Russian Grammar Basics",
-        description: "Rus tili grammatikasining asosiy qoidalari.",
-        progress: 42,
-        moduleCount: 20,
-        duration: "24h 15m",
-        image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
-        teacher: "Ibrat Farzandlari",
-        language: "ru"
-    },
-    {
-        id: 3,
-        title: "Intermediate English (B1)",
-        description: "Ingliz tilini keyingi bosqichda davom ettiring.",
-        progress: 5,
-        moduleCount: 18,
-        duration: "18h 00m",
-        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800",
-        teacher: "Ibrat Farzandlari",
-        language: "en"
-    },
-    {
-        id: 4,
-        title: "Deutsch für Anfänger",
-        description: "Nemis tili boshlang'ich kurs.",
-        progress: 0,
-        moduleCount: 10,
-        duration: "10h 00m",
-        image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&q=80&w=800",
-        teacher: "Ibrat Farzandlari",
-        language: "de"
-    }
-];
-
-const stats = [
-    { label: "O'qish Vaqti", value: "34 soat", icon: Clock, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
-    { label: "Sertifikatlar", value: "3", icon: Award, color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
-    { label: "Joriy Streak", value: "12 Kun", icon: Zap, color: "text-amber-500", bg: "bg-amber-50 border-amber-100" },
-];
-
-const languages = [
-    { id: 'en', name: 'Ingliz tili', flag: '🇬🇧' },
-    { id: 'ru', name: 'Rus tili', flag: '🇷🇺' },
-    { id: 'de', name: 'Nemis tili', flag: '🇩🇪' },
-    { id: 'fr', name: 'Fransuz tili', flag: '🇫🇷' },
-];
+const LANG_MAP: Record<string, { name: string; flag: string }> = {
+    en: { name: "Ingliz tili", flag: "🇬🇧" },
+    ru: { name: "Rus tili", flag: "🇷🇺" },
+    de: { name: "Nemis tili", flag: "🇩🇪" },
+    fr: { name: "Fransuz tili", flag: "🇫🇷" },
+    uz: { name: "O'zbek tili", flag: "🇺🇿" },
+};
 
 export default function Dashboard() {
-    const [selectedLang, setSelectedLang] = useState('en');
+    const courses = getAdminCourses();
+    const allLanguages = [...new Set(courses.map(c => c.language))];
+    const [selectedLang, setSelectedLang] = useState(allLanguages[0] || 'en');
 
-    const filteredCourses = mockCourses.filter(c => c.language === selectedLang);
+    const filteredCourses = courses.filter(c => c.language === selectedLang);
+    const studyTime = getTotalStudyTime();
+    const completedLessons = getTotalCompletedLessons();
+
+    const stats = [
+        { label: "O'qish Vaqti", value: studyTime, icon: Clock, color: "text-blue-600", bg: "bg-blue-50 border-blue-100" },
+        { label: "Tugatilgan Darslar", value: String(completedLessons), icon: Award, color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
+        { label: "Jami Kurslar", value: String(courses.length), icon: Zap, color: "text-amber-500", bg: "bg-amber-50 border-amber-100" },
+    ];
+
+    const languages = allLanguages.map(id => ({
+        id,
+        name: LANG_MAP[id]?.name || id,
+        flag: LANG_MAP[id]?.flag || "🌐",
+    }));
 
     return (
         <div className="space-y-10">
@@ -74,7 +40,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Language Hub 🌍</h1>
-                    <p className="text-slate-500 mt-2 text-lg">"Ibrat Farzandlari" bilan tillarni oson o'rganing!</p>
+                    <p className="text-slate-500 mt-2 text-lg">Tillarni oson o'rganing!</p>
                 </div>
                 <div className="flex gap-3">
                     <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50">
@@ -108,11 +74,22 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredCourses.length > 0 ? (
                     filteredCourses.map((course) => (
-                        <CourseCard key={course.id} {...course} />
+                        <CourseCard
+                            key={course.id}
+                            id={course.id}
+                            title={course.title}
+                            description={course.description}
+                            progress={getCourseProgress(course.id, course.lessons.length)}
+                            moduleCount={course.lessons.length}
+                            duration={`${course.lessons.length} dars`}
+                            image={course.thumbnail}
+                            teacher={course.teacher}
+                            language={course.language}
+                        />
                     ))
                 ) : (
                     <div className="col-span-full py-20 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                        <p className="text-slate-400">Bu til bo'yicha kurshlar hozircha yo'q. Tez orada qo'shiladi!</p>
+                        <p className="text-slate-400">Bu til bo'yicha kurslar hozircha yo'q. Admin paneldan qo'shing!</p>
                     </div>
                 )}
             </div>

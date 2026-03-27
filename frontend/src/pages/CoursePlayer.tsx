@@ -1,25 +1,49 @@
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useSearchParams } from "react-router-dom"
 import { useState, useEffect } from "react"
 import { AITutorSidebar } from "@/components/AITutorSidebar"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Zap, BookOpen } from "lucide-react"
-import { ENGLISH_COURSE, ALL_COURSES, type Lesson } from "@/data/courses"
+import { getAdminCourses } from "@/data/adminStore"
+import type { Lesson } from "@/data/courses"
 
 export function CoursePlayer() {
     const { id } = useParams()
+    const [searchParams] = useSearchParams()
+    const courseIdParam = searchParams.get('course')
+    const courses = getAdminCourses()
     const [lesson, setLesson] = useState<Lesson | null>(null);
+    const [courseId, setCourseId] = useState<number | null>(null);
 
     useEffect(() => {
-        // Find lesson by ID from all courses
         let found: Lesson | null = null;
-        for (const course of ALL_COURSES) {
-            found = course.lessons.find(l => l.id === Number(id)) || null;
-            if (found) break;
+        let foundCourseId: number | null = null;
+
+        // If courseId specified via query param, look there first
+        if (courseIdParam) {
+            const course = courses.find(c => c.id === Number(courseIdParam));
+            if (course) {
+                found = course.lessons.find(l => l.id === Number(id)) || null;
+                if (found) foundCourseId = course.id;
+            }
         }
-        // Fallback to first lesson if not found
-        if (!found) found = ENGLISH_COURSE.lessons[0];
+
+        // Otherwise search all courses
+        if (!found) {
+            for (const course of courses) {
+                found = course.lessons.find(l => l.id === Number(id)) || null;
+                if (found) { foundCourseId = course.id; break; }
+            }
+        }
+
+        // Fallback to first lesson of first course
+        if (!found && courses.length > 0 && courses[0].lessons.length > 0) {
+            found = courses[0].lessons[0];
+            foundCourseId = courses[0].id;
+        }
+
         setLesson(found);
-    }, [id]);
+        setCourseId(foundCourseId);
+    }, [id, courseIdParam]);
 
     const formatTime = (seconds: number) => {
         const m = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -27,11 +51,14 @@ export function CoursePlayer() {
         return `${m}:${s}`;
     }
 
-    // Find adjacent lessons for navigation
-    const allLessons = ALL_COURSES.flatMap(c => c.lessons);
-    const currentIdx = allLessons.findIndex(l => l.id === lesson?.id);
-    const prevLesson = currentIdx > 0 ? allLessons[currentIdx - 1] : null;
-    const nextLesson = currentIdx < allLessons.length - 1 ? allLessons[currentIdx + 1] : null;
+    // Find adjacent lessons within the same course
+    const currentCourse = courses.find(c => c.id === courseId);
+    const courseLessons = currentCourse?.lessons || [];
+    const currentIdx = courseLessons.findIndex(l => l.id === lesson?.id);
+    const prevLesson = currentIdx > 0 ? courseLessons[currentIdx - 1] : null;
+    const nextLesson = currentIdx < courseLessons.length - 1 ? courseLessons[currentIdx + 1] : null;
+
+    const backLink = courseId ? `/course/${courseId}` : '/';
 
     const context = lesson ? {
         title: lesson.title,
@@ -49,7 +76,7 @@ export function CoursePlayer() {
                 {/* Header */}
                 <header className="h-14 border-b flex items-center px-4 bg-card shrink-0 gap-3">
                     <Button variant="ghost" size="sm" asChild>
-                        <Link to="/course/1" className="gap-2">
+                        <Link to={backLink} className="gap-2">
                             <ArrowLeft className="w-4 h-4" />
                             Darslarga qaytish
                         </Link>
@@ -57,7 +84,7 @@ export function CoursePlayer() {
                     <div className="w-px h-5 bg-slate-200" />
                     <span className="flex items-center gap-1.5 text-sm text-indigo-600 font-medium">
                         <BookOpen className="w-4 h-4" />
-                        Ingliz tili
+                        {currentCourse?.title || "Kurs"}
                     </span>
                     <div className="w-px h-5 bg-slate-200" />
                     <h1 className="font-semibold text-slate-800 text-sm truncate">{lesson?.title || "Yuklanmoqda..."}</h1>
@@ -92,13 +119,13 @@ export function CoursePlayer() {
                         {/* Lesson Navigation */}
                         <div className="flex items-center justify-between">
                             {prevLesson ? (
-                                <Link to={`/lesson/${prevLesson.id}`} className="flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+                                <Link to={`/lesson/${prevLesson.id}?course=${courseId}`} className="flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 transition-colors">
                                     <ArrowLeft className="w-4 h-4" />
                                     <span className="hidden sm:block truncate max-w-xs">{prevLesson.title}</span>
                                 </Link>
                             ) : <div />}
                             {nextLesson && (
-                                <Link to={`/lesson/${nextLesson.id}`} className="flex items-center gap-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition-all">
+                                <Link to={`/lesson/${nextLesson.id}?course=${courseId}`} className="flex items-center gap-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-xl transition-all">
                                     Keyingi dars →
                                 </Link>
                             )}
