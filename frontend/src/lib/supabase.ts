@@ -77,13 +77,37 @@ export async function signUp(name: string, email: string, password: string) {
         password,
         options: { data: { name } },
     });
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+        console.error('signUp error:', error.message);
+        return { ok: false, error: error.message };
+    }
+    // Supabase may return a user even if email confirmation is required
+    // In that case, the user exists but session may be null
+    if (data.user && !data.session) {
+        // Auto sign in after signup if email confirmation is disabled
+        const signInResult = await supabase.auth.signInWithPassword({ email, password });
+        if (signInResult.error) {
+            // Email confirmation might be enabled — tell user
+            return { ok: true, user: data.user };
+        }
+        return { ok: true, user: signInResult.data.user };
+    }
     return { ok: true, user: data.user };
 }
 
 export async function signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { ok: false, error: error.message };
+    if (error) {
+        console.error('signIn error:', error.message);
+        // More user-friendly error messages
+        if (error.message.includes('Invalid login credentials')) {
+            return { ok: false, error: "Email yoki parol noto'g'ri" };
+        }
+        if (error.message.includes('Email not confirmed')) {
+            return { ok: false, error: "Email tasdiqlanmagan. Pochtangizni tekshiring" };
+        }
+        return { ok: false, error: error.message };
+    }
     return { ok: true, user: data.user };
 }
 
@@ -98,18 +122,66 @@ export async function getCurrentUser() {
 
 export async function getCurrentProfile(): Promise<Profile | null> {
     const user = await getCurrentUser();
-    if (!user) return null;
-    const { data } = await supabase
+    if (!user) {
+        console.log('getCurrentProfile: no authenticated user');
+        return null;
+    }
+
+    const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
+
+    if (error) {
+        console.error('getCurrentProfile query error:', error.message, error.code);
+
+        // Profile doesn't exist — auto-create it from user metadata
+        if (error.code === 'PGRST116') {
+            console.log('Profile not found, auto-creating from user metadata...');
+            const name = user.user_metadata?.name || user.email?.split('@')[0] || '';
+            const { data: newProfile, error: insertError } = await supabase
+                .from('profiles')
+                .insert({ id: user.id, name, email: user.email || '' })
+                .select()
+                .single();
+
+            if (insertError) {
+                console.error('Auto-create profile failed:', insertError.message);
+                // Return a minimal profile object so the app doesn't break
+                return {
+                    id: user.id,
+                    name,
+                    email: user.email || '',
+                    is_admin: false,
+                    created_at: new Date().toISOString(),
+                };
+            }
+            return newProfile;
+        }
+
+        // Table might not exist yet
+        if (error.code === '42P01' || error.message.includes('does not exist')) {
+            console.error('profiles table does not exist! Run supabase_setup.sql first.');
+            return {
+                id: user.id,
+                name: user.user_metadata?.name || '',
+                email: user.email || '',
+                is_admin: false,
+                created_at: new Date().toISOString(),
+            };
+        }
+
+        return null;
+    }
+
     return data;
 }
 
 export async function isAdmin(): Promise<boolean> {
     const profile = await getCurrentProfile();
-    return profile?.is_admin ?? false;
+    console.log('isAdmin check, profile:', profile?.email, 'is_admin:', profile?.is_admin);
+    return profile?.is_admin === true;
 }
 
 // ─── Courses CRUD ───

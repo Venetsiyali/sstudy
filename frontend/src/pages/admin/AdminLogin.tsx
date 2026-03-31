@@ -23,10 +23,21 @@ export default function AdminLogin() {
             return;
         }
 
+        // Small delay to ensure auth state is fully propagated
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // Check if user is admin
         const profile = await getCurrentProfile();
-        if (!profile?.is_admin) {
-            setError("Sizda admin huquqi yo'q");
+        console.log('Admin login - profile result:', profile);
+
+        if (!profile) {
+            setError("Profil topilmadi. Supabase SQL sozlamalarini tekshiring.");
+            setLoading(false);
+            return;
+        }
+
+        if (profile.is_admin !== true) {
+            setError("Sizda admin huquqi yo'q. Supabase > profiles jadvalida is_admin = TRUE qilib o'rnating.");
             setLoading(false);
             return;
         }
